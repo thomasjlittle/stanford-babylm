@@ -1,5 +1,13 @@
 # stanford-babylm
 
+This is the shared codebase for the Stanford BabyLM team. It is basically a dressed-up version of Huggingface's standard [`run_clm.py`](https://github.com/huggingface/transformers/blob/main/examples/pytorch/language-modeling/run_clm.py) script, which does causal (decoder-only) language modeling on a set of training files and evaluates perplexity on a set of validation files.
+
+It is "dressed up" in the sense that
+
+1. we have switched to Hydra for experiment (see below),
+2. we have refactored some of the code into separate files for cleanliness,
+3. we have slightly improved Weights and Biases logging.
+
 # Setup
 
 Please follow these innstructions for setup so we can have a consistent development environment and package versions.
