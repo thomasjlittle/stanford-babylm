@@ -70,7 +70,7 @@ python -m src.run_clm +model=gpt2-small +dataset=babylm_10M
 ```
 
 This runs GPT2-Small architecture on all of the 10M training files, with eval on all of the dev files. It will log a run to
-`wandb.ai/<YOUR_USERNAME>/stanford-babylm/groups/run-gpt2-small-babylm_10M`.
+`wandb.ai/<YOUR_USERNAME>/stanford-babylm/groups/debug-gpt2-small-babylm_10M`.
 
 If you use VSCode, there is a launch config in `.vscode/launch.json` which runs
 this in the VSCode debugger.
@@ -108,7 +108,7 @@ the above; you can also save **groups** of changes into a YAML configuration
 file, and apply **groups** of changes at once. So for example you might make a
 file, `src/conf/model/gpt2-medium.yaml`, which looks like:
 
-```
+```yaml
 # @package _global_
 model: gpt2-medium
 per_device_train_batch_size: 8
@@ -125,16 +125,71 @@ python -m src.run_clm +model=gpt2-medium
 
 You'll see that the example run above uses two config groups: a `dataset` group
 and a `model` group. You can access the corresponding YAML files in
-`src/conf/dataset` and `src/conf/model`, respectively. Feel free to add more
-YAML files or even create new config groups. This will come in handy as we do a
-lot of experimentation!
+`src/conf/dataset` and `src/conf/model`, respectively. There is a default config
+as well: `src/conf/config.yaml`. The values in the default config get read
+first; then the additional configs (applied a la `+model=`) override the default
+values. If you change the default config, make sure it is a change that you
+think will should sensibly be set for all further experiment runs (e.g. a
+default setting in case we add some new architecture). Otherwise, add new
+changes in a separate config group.
 
-One more benefit is that you can run *sweeps* over arguments automatically, via
-command line. I'll talk about this later if we get to it.
+Another benefit is that unlike argparse, Hydra supports rich hierarchical/nested config structure. So you can have a set of training arguments in your YAML file like
+
+```yaml
+model:
+  model_name_or_path: gpt2-small
+
+training:
+  per_device_train_batch_size: 4
+  per_device_eval_batch_size: 4
+```
+and these are kept in separate namespaces, and you can use `args.model.model_name_or_path` or `args.training.per_device_train_batch_Size` to refer to the relevant args in your script.
+
+Feel free to add more YAML files or even create new config groups. This will
+come in handy as we do a lot of experimentation!
+
+Lastly, Hydra also supports running *sweeps* over arguments automatically, [via command line](https://hydra.cc/docs/tutorials/basic/running_your_app/multi-run/). I'll talk about this later if we get to it.
+
+## Weights and Biases
+
+Weights and Biases config is slightly different from Huggingface default. Take a
+look at the `WandBArguments` class in `arguments.py`, and correspondingly, the
+`wandb:` set of arguments in `src/conf/config.yaml`, which look like:
+
+```yaml
+wandb:
+  # Set this to false here or via command line (e.g. `wandb.log=false`) to disable wandb logging.
+  log: true
+  # The name of the wandb project under your account.
+  project: stanford-babylm
+  # The name of the group that a run will fall under. This intimidating syntax
+  # just interpolates values from other config settings set during your run. For
+  # example ${hydra:runtime.choices.model} is the +model= command you specified;
+  # likewise via dataset. `wandb.tag` is a key that is not set here but by
+  # default is set to "debug". You might tag experiments with the current date,
+  # or a name, to remind yourself of which experiments are which. This lets you
+  # change the name of the group while still having the auto-generated group
+  # name parts (model/dataset).
+  group: ${wandb.tag}-${hydra:runtime.choices.model}-${hydra:runtime.choices.dataset}
+  # Groups carry groups of runs; this is the name of the individual run, which is the group + a seed.
+  name: ${wandb.group}-run-${training.seed}
+```
+
+The comments are self explanatory, but basically, if you want to tag an
+experiment so that it shows up as a separate group, you might do something like
+
+```
+python -m src.run_clm +model=gpt2-small +dataset=babylm_10M wandb.tag=test-new-architecture
+```
+
+which generates a run at `wandb.ai/<YOUR_USERNAME>/stanford-babylm/groups/test-new-architecture-gpt2-small-babylm_10M`.
+
+Note the lack of `+` when setting individual keys, versus the `+` needed when
+applying an entire YAML file to override configs.
 
 ### Adding arguments
 
-To add arguments, you will want to (1) add the corresponding argument, with its
+To add new arguments, you will want to (1) add the corresponding argument, with its
 type, to the corresponding dataclass object (e.g. `DataTrainingArguments` or
 `TrainingArguments`) in `arguments.py`; then (2) you can specify it via command
 line or in a config file. This uses Hydra's [Structured

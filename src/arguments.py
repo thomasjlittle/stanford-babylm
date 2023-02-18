@@ -51,7 +51,7 @@ class WandBArguments:
     group: Optional[str] = field(default="debug", metadata={"help": "wandb group"})
     name: Optional[str] = field(default="run", metadata={"help": "wandb run name"})
     tag: Optional[str] = field(
-        default="run", metadata={"help": "optional tag to prefix wandb group"}
+        default="debug", metadata={"help": "optional tag to prefix wandb group"}
     )
 
 
