@@ -128,3 +128,9 @@ dmypy.json
 # Pyre type checker
 .pyre/
 babylm_data/
+wandb/
+.submitit/
+multirun/
+.hydra/
+exp/*
+!exp/README.md

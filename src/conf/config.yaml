@@ -1,0 +1,55 @@
+hydra:
+  run:
+    dir: .
+  sweep:
+    dir: .
+    subdir: .
+  job_logging:
+    root:
+      level: INFO
+  job:
+    env_set:
+      TOKENIZERS_PARALLELISM: "false"
+
+
+defaults:
+  - base_config
+  - _self_
+
+wandb:
+  log: true
+  project: stanford-babylm
+  group: ${wandb.tag}-${hydra:runtime.choices.model}-${hydra:runtime.choices.dataset}
+  name: ${wandb.group}-run-${training.seed}
+
+data:
+  block_size: 512
+
+model:
+  model_name_or_path: gpt2
+  # Recommend symlinking .cache to wherever you have space to store models,
+  # datasets, etc.
+  cache_dir: .cache/
+
+training:
+  do_train: true
+  do_eval: true
+  # Recommend symlinking exp to wherever you have space for experiment runs.
+  output_dir: exp/${wandb.group}/${wandb.name}
+
+  # wandb is handled manually, with CustomWandbCallback. Just set wandb.log=true
+  # if you want logging.
+  report_to: "none"
+
+  num_train_epochs: 10
+  per_device_train_batch_size: 2
+  per_device_eval_batch_size: 2
+
+  # Save/eval every 500 steps and track best model
+  overwrite_output_dir: false  # Resume training from checkpoint if it exists.
+  evaluation_strategy: steps
+  save_strategy: steps
+  eval_steps: 500
+  save_steps: 500
+  save_total_limit: 1
+  load_best_model_at_end: true

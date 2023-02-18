@@ -1,0 +1,6 @@
+# @package _global_
+
+# Use default GPT2-medium architecture (335M params)
+
+model:
+  model_name_or_path: gpt2-medium

@@ -1,0 +1,8 @@
+# @package _global_
+
+# This config runs models on the babylm 100M dataset.
+
+data:
+  train_file: "babylm_data/babylm_100M/*.train"
+  validation_file: "babylm_data/babylm_dev/*.dev"
+  max_eval_samples: 2000  # Truncate validation data for faster training.
