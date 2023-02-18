@@ -52,12 +52,14 @@ have been installed from `requirements.txt`. Now do:
 pre-commit install
 ```
 
-Whenever you make a commit, pre-commit should automatically format your code.
+Whenever you make a commit, if your code is not formatted properly, pre-commit
+should automatically format your code. Then you need to add the new files and
+repeat the commit message.
 
 If you use VSCode for development I also highly recommend using the
 [black](https://marketplace.visualstudio.com/items?itemName=ms-python.black-formatter)
 and [isort](https://marketplace.visualstudio.com/items?itemName=ms-python.isort)
-plugins, auto-formatting upon save.
+plugins, auto-formatting upon save. You can read a tutorial here: https://cereblanco.medium.com/setup-black-and-isort-in-vscode-514804590bf9
 
 # Usage
 
