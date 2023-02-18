@@ -160,6 +160,8 @@ Lastly, Hydra also supports running *sweeps* over arguments automatically, [via 
 
 ## Weights and Biases
 
+We use Weights and Biases for (super convenient!) experiment logging and management. Follow the setup instructions above to get WandB setup.
+
 Weights and Biases config is slightly different from Huggingface default. Take a
 look at the `WandBArguments` class in `arguments.py`, and correspondingly, the
 `wandb:` set of arguments in `src/conf/config.yaml`, which look like:
@@ -195,7 +197,7 @@ which generates a run at `wandb.ai/<YOUR_USERNAME>/stanford-babylm/groups/test-n
 Note the lack of `+` when setting individual keys, versus the `+` needed when
 applying an entire YAML file to override configs.
 
-### Adding arguments
+## Adding arguments
 
 To add new arguments, you will want to (1) add the corresponding argument, with its
 type, to the corresponding dataclass object (e.g. `DataTrainingArguments` or
