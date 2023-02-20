@@ -50,19 +50,25 @@ Run `./download_data.sh` in home dir to download BabyLM data to
 
 Follow instructions here: https://docs.wandb.ai/quickstart
 
-## 5. Set up VSCode/pre-commit
+## 5. Set up pre-commit
 
 We're going to use `black` and `isort`, python formatters, to automatically
-format code whenever we push to maintain consistent style. `pre-commit` should
-have been installed from `requirements.txt`. Now do:
+format code whenever we push to maintain consistent style, as well as `flake8`,
+a Python linter. `pre-commit` should have been installed from
+`requirements.txt`. Now do:
 
 ```
 pre-commit install
 ```
 
-Whenever you make a commit, if your code is not formatted properly, pre-commit
-should automatically format your code. Then you need to add the new files and
-repeat the commit message.
+Whenever you make a commit, if your code is not formatted properly or has
+issues, pre-commit should automatically format your code. Then you need to add
+the new files and repeat the commit message.
+
+If flake8 returns errors, please review them and determine whether they're
+significant. Note that if flake8 is complaining and you truly don't think it's
+an error, feel free to ask flake8 to ignore the errors by using the `  # noqa`
+comment (https://flake8.pycqa.org/en/3.1.1/user/ignoring-errors.html).
 
 If you use VSCode for development I also highly recommend using the
 [black](https://marketplace.visualstudio.com/items?itemName=ms-python.black-formatter)
