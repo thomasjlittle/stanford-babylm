@@ -1,0 +1,9 @@
+# @package _global_
+
+# Use modified GPT2-small architecture with 6-layers (82M params)
+
+model:
+  model_name_or_path: null #unsure why I need to specify this since I added `default= None` to the Argument class but it is necessary otherwise defaults to gpt2
+  model_type: gpt2
+  tokenizer_name: gpt2
+  config_overrides: "n_layer=6"

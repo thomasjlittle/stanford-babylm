@@ -105,14 +105,18 @@ class ModelArguments:
     fine-tune, or train from scratch.
     """
 
-    model_name_or_path: str = field(
-        default="gpt2",
+    model_name_or_path: Optional[str] = field(
+        default=None,
         metadata={
             "help": (
                 "The model checkpoint for weights initialization.Don't set if you want "
                 "to train a model from scratch."
             )
         },
+    )
+    model_type: Optional[str] = field(
+        default=None,
+        metadata={"help": "If training from scratch, pass a model type from the list: " + ", ".join(MODEL_TYPES)},
     )
     config_name: Optional[str] = field(
         default=None,
@@ -159,6 +163,15 @@ class ModelArguments:
             "help": (
                 "Will use the token generated when running `huggingface-cli login` "
                 "(necessary to use this script with private models)."
+            )
+        },
+    )
+    config_overrides: Optional[str] = field(
+        default=None,
+        metadata={
+            "help": (
+                "Override some existing default config settings when a model is trained from scratch. Example: "
+                "n_embd=10,resid_pdrop=0.2,scale_attn_weights=false,summary_type=cls_index"
             )
         },
     )
