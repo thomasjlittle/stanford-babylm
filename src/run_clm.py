@@ -50,6 +50,10 @@ from . import data_preprocessors
 from .arguments import Arguments, global_setup
 from .integrations import CustomWandbCallback
 
+from tokenizers import Tokenizer
+from tokenizers.processors import TemplateProcessing
+from transformers import GPT2TokenizerFast
+
 # Will error if the minimal version of Transformers is not installed. Remove at
 # your own risks.
 check_min_version("4.23.0")
@@ -206,14 +210,17 @@ def main(args: DictConfig) -> None:
         "revision": args.model.model_revision,
         "use_auth_token": True if args.model.use_auth_token else None,
     }
+
     if args.model.tokenizer_name:
         tokenizer = AutoTokenizer.from_pretrained(
-            args.model.tokenizer_name, **tokenizer_kwargs
-        )
+             args.model.tokenizer_name, **tokenizer_kwargs
+         )
+
     elif args.model.model_name_or_path:
         tokenizer = AutoTokenizer.from_pretrained(
-            args.model.model_name_or_path, **tokenizer_kwargs
-        )
+             args.model.model_name_or_path, **tokenizer_kwargs
+         )
+
     else:
         raise ValueError(
             "You are instantiating a new tokenizer from scratch. This is not supported "
@@ -221,6 +228,22 @@ def main(args: DictConfig) -> None:
             "You can do it from another script, save it, and load it from here, using "
             "--tokenizer_name."
         )
+
+    bos = '<|bos|>'
+    eos = '<|eos|>'
+    pad = '<|pad|>'
+    special_tokens_dict = {'eos_token': eos, 'bos_token': bos, 'pad_token': pad}
+    tokenizer.add_special_tokens(special_tokens_dict)
+    tokenizer_token = Tokenizer.from_pretrained("gpt2")
+    tokenizer_token.post_processor = TemplateProcessing(
+    single=bos + " $A " + eos,
+    special_tokens=[(eos, tokenizer.eos_token_id), (bos, tokenizer.bos_token_id)],
+    )
+    tokenizer = GPT2TokenizerFast(tokenizer_object=tokenizer_token)
+
+
+   # sample_sentence = 'I like eating pizza'
+   # enconding = tokenizer(sample_sentence, return_tensors = "pt", add_special_tokens=True)['input_ids']
 
     # Initialize model
     model = AutoModelForCausalLM.from_config(config)
@@ -286,6 +309,8 @@ def main(args: DictConfig) -> None:
     custom_callbacks = []
     if args.wandb.log:
         custom_callbacks.append(CustomWandbCallback(args))
+
+    
 
     trainer = Trainer(
         model=model,

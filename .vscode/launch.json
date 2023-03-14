@@ -15,6 +15,7 @@
             ],
             "env": {
                 "CUDA_VISIBLE_DEVICES": "0",
+                "PYTHONPATH":"${PYTHONPATH}::~/anaconda3/envs/babylm"
             },
             "justMyCode": true
         }
