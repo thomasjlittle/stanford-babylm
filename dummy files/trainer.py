@@ -2570,14 +2570,14 @@ class Trainer:
         input_strs = [self.tokenizer.decode(string) for string in input["input_ids"]]
         input_strs = [sentence for text in input_strs for sentence in text.split('\n')]
 
+        # Drop any empty strings and strings less than 3 words (as they result in ~0 t_score)
+        input_strs = [string for string in input_strs if len(string.strip().split()) >= 4]
+
         # Sample input strings
         sampled_str_idxs = random.sample(
             range(len(input_strs)), k=min(len(input_strs), 10)
         )
         input_strs = [input_strs[idx] for idx in sampled_str_idxs]
-
-        # Drop any empty strings
-        input_strs = [string for string in input_strs if string.strip()]
 
         # Truncate input string length to avoid excessivly slow calcs for long sentences
         def truncate_strings(word_list, max_words=10):
@@ -2647,7 +2647,8 @@ class Trainer:
             loss = outputs["loss"] if isinstance(outputs, dict) else outputs[0]
 
         # Combine tree loss with default loss
-        combined_loss = loss + t_loss
+        beta = 0.2
+        combined_loss = beta * loss - t_loss
 
         return (combined_loss, outputs) if return_outputs else combined_loss
 
