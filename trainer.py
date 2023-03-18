@@ -2636,7 +2636,7 @@ class Trainer:
             loss = outputs["loss"] if isinstance(outputs, dict) else outputs[0]
 
         # Combine tree loss with default loss
-        combined_loss = loss + t_loss
+        combined_loss = loss + 0.001*t_loss
 
         return (combined_loss, outputs) if return_outputs else combined_loss
 
