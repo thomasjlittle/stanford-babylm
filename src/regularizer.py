@@ -86,12 +86,6 @@ class Chart():
                 outputs = [model(inputs, attention_mask=mask, output_hidden_states=True).hidden_states[layer_id]]
                 outputs = [hs * (mask_mult) for hs in outputs]
 
-                # Detach tensors and move them back to the CPU
-                inputs = inputs.detach().cpu()
-                input_lens = input_lens.detach().cpu()
-                len_mask = len_mask.detach().cpu()
-                tree_mask = tree_mask.detach().cpu()
-
                 for idx, _ in enumerate(cslice):
                     inner_vec = outputs[0][idx].sum(axis=0)
                     oidx = str_idx[idx + st]
@@ -99,8 +93,6 @@ class Chart():
                     outer_vec = outer_context_vecs[oidx][0].sum(axis=0)
                     scores[oidx][(i, j)] = self.sim_metric(outer_vec, inner_vec)
 
-
-                [vec.detach().cpu() for vec in outer_context_vecs]
                 progress_bar.update(en - st)
                 st = en
         return scores 
@@ -194,7 +186,7 @@ class Regularizer():
                 result.append(truncated_string)
             return result
     
-        sample_strs = truncate_strings(sample_strs, 8)
+        sample_strs = truncate_strings(sample_strs, 10)
 
         chart_scores_all = self.chart.build_scores(sample_strs, model, start_relax_layer=self.start_relax_layer, tqdm_disable=True)
 
@@ -212,11 +204,10 @@ class Regularizer():
             rand_loss[idx] /= (2 * (len(split_string) - 1))
 
         lambd = 0.1
-        loss = [torch.clamp(cur + lambd - rand, min=0) for cur, rand in zip(loss_cur, rand_loss)]
+        loss = [torch.clamp(rand + lambd - cur, min=0) for cur, rand in zip(loss_cur, rand_loss)]
 
 
         avg_loss = sum(loss) / len(loss)
-        loss = [vec.detach().cpu() for vec in loss]
         return avg_loss
 
 

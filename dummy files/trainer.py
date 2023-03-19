@@ -151,8 +151,9 @@ from .utils import (
 from .utils.generic import ContextManagers
 
 # Tree Loss Function
-sys.path.append('/home/ubuntu/stanford-babylm/TreeRegularizer')
-from tree_projection import TreeProjection
+sys.path.append('/home/ubuntu/stanford-babylm/')
+from TreeRegularizer.tree_projection import TreeProjection
+from src.regularizer import Chart, Regularizer
 
 _is_native_cpu_amp_available = is_torch_greater_or_equal_than_1_10
 
@@ -2573,44 +2574,13 @@ class Trainer:
         # Drop any empty strings and strings less than 3 words (as they result in ~0 t_score)
         input_strs = [string for string in input_strs if len(string.strip().split()) >= 4]
 
-        # Sample input strings
-        sampled_str_idxs = random.sample(
-            range(len(input_strs)), k=min(len(input_strs), 10)
-        )
-        input_strs = [input_strs[idx] for idx in sampled_str_idxs]
-
-        # Truncate input string length to avoid excessivly slow calcs for long sentences
-        def truncate_strings(word_list, max_words=10):
-            result = []
-            for string in word_list:
-                words = string.split()
-                truncated_string = ' '.join(words[:max_words])
-                result.append(truncated_string)
-            return result
-    
-        input_strs = truncate_strings(input_strs, 10)
-
         # Compute tscore for each sentence in the batch
-        tree_projector = TreeProjection(model, self.tokenizer)
+        regularizer = Regularizer(lambda x1, x2: nn.functional.cosine_similarity(x1, x2, dim=0), input_strs, parse_splits=None, as_hinge=True, model = model, tokenizer=self.tokenizer)
 
-        scores = [
-            tree_projector(input_str, 
-                           st_threshold=3,
-                           ret_dict=True,
-            )
-            for input_str in input_strs
-        ]
+        loss_curr = regularizer(model)
 
-        tscore = [x["tscore"] for x in scores]
-        
-        # Compute average tscore
-        avg_tscore = torch.mean(torch.tensor(tscore))
-
-        # YMaybe add some regularization?
-
-        return avg_tscore
-
-
+        return loss_curr   
+    
     def compute_loss(self, model, inputs, return_outputs=False):
         """
         How the loss is computed by Trainer. By default, all models return the loss in the first element.
@@ -2647,8 +2617,8 @@ class Trainer:
             loss = outputs["loss"] if isinstance(outputs, dict) else outputs[0]
 
         # Combine tree loss with default loss
-        beta = 0.2
-        combined_loss = beta * loss - t_loss
+        beta = 5
+        combined_loss = loss + beta * t_loss
 
         return (combined_loss, outputs) if return_outputs else combined_loss
 
