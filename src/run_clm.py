@@ -37,6 +37,7 @@ from transformers import (
     AutoConfig,
     AutoModelForCausalLM,
     AutoTokenizer,
+    GPT2Tokenizer,
     Trainer,
     default_data_collator,
     is_torch_tpu_available,
@@ -207,11 +208,11 @@ def main(args: DictConfig) -> None:
         "use_auth_token": True if args.model.use_auth_token else None,
     }
     if args.model.tokenizer_name:
-        tokenizer = AutoTokenizer.from_pretrained(
+        tokenizer = GPT2Tokenizer.from_pretrained(
             args.model.tokenizer_name, **tokenizer_kwargs
         )
     elif args.model.model_name_or_path:
-        tokenizer = AutoTokenizer.from_pretrained(
+        tokenizer = GPT2Tokenizer.from_pretrained(
             args.model.model_name_or_path, **tokenizer_kwargs
         )
     else:
