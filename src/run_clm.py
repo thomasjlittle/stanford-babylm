@@ -148,7 +148,7 @@ def main(args: DictConfig) -> None:
             if args.data.train_file is not None
             else args.data.validation_file.split(".")[-1]
         )
-        if extension == "txt" or extension == "train":
+        if extension == "txt" or extension == "train" or extension == "dev":
             extension = "text"
             dataset_args["keep_linebreaks"] = args.data.keep_linebreaks
         raw_datasets = load_dataset(
@@ -192,6 +192,11 @@ def main(args: DictConfig) -> None:
         config = AutoConfig.from_pretrained(
             args.model.model_name_or_path, **config_kwargs
         )
+        if args.model.config_overrides is not None:
+            logger.info(f"Overriding config: {args.model.config_overrides}")
+            config.update_from_string(args.model.config_overrides)
+            logger.info(f"New config: {config}")
+
     else:
         config = CONFIG_MAPPING[args.model.model_type]()
         logger.warning("You are instantiating a new config instance from scratch.")
@@ -223,7 +228,10 @@ def main(args: DictConfig) -> None:
         )
 
     # Initialize model
-    model = AutoModelForCausalLM.from_config(config)
+    if args.training.do_train:
+        model = AutoModelForCausalLM.from_config(config)
+    else:
+        model = AutoModelForCausalLM.from_pretrained(args.model.model_name_or_path)
     n_params = sum(dict((p.data_ptr(), p.numel()) for p in model.parameters()).values())
     logger.info(
         f"Training new model from scratch - Total size={n_params/2**20:.2f}M params"

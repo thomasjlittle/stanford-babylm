@@ -33,6 +33,7 @@ model:
 
 training:
   do_train: true
+  #do_train: false
   do_eval: true
   # Recommend symlinking exp to wherever you have space for experiment runs.
   output_dir: exp/${wandb.group}/${wandb.name}
@@ -41,7 +42,7 @@ training:
   # if you want logging.
   report_to: "none"
 
-  num_train_epochs: 10
+  num_train_epochs: 11
   per_device_train_batch_size: 2
   per_device_eval_batch_size: 2
 
@@ -50,6 +51,6 @@ training:
   evaluation_strategy: steps
   save_strategy: steps
   eval_steps: 500
-  save_steps: 500
-  save_total_limit: 1
+  save_steps: 28000
+  save_total_limit: 20
   load_best_model_at_end: true

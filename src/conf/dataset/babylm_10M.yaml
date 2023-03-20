@@ -3,6 +3,8 @@
 # This config runs models on the babylm 10M dataset.
 
 data:
-  train_file: "babylm_data/babylm_10M/*.train"
+  train_file: null
+  # "babylm_data/babylm_10M/*.train"
   validation_file: "babylm_data/babylm_dev/*.dev"
+  #validation_file: "babylm_data/GECA_Generated_1k/*.train"
   max_eval_samples: 2000  # Truncate validation data for faster training.
