@@ -8,15 +8,16 @@
             "name": "debug",
             "type": "python",
             "request": "launch",
-            "module": "src.run_clm",
-            "args": [
-                "+model=gpt2-small",
-                "+dataset=babylm_10M",
-            ],
-            "env": {
-                "CUDA_VISIBLE_DEVICES": "0",
-            },
-            "justMyCode": true
+            "module": "plot_results",
+            // "module": "src.run_clm",
+            // "args": [
+            //     "+model=gpt2-verysmall",
+            //     "+dataset=babylm_10M",
+            // ],
+            // "env": {
+            //     "CUDA_VISIBLE_DEVICES": "1",
+            // },
+            "justMyCode": false
         }
     ]
 }
